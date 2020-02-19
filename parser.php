@@ -71,54 +71,123 @@ if (!empty($links_category)) {
             $available = '';
             $price = '';
             $desc = '';
+
+
+            if (str_get_html($page_item->find('.breads', 0)->find('.breads-item', 1)->find('a', 0))) {
+              $category = html_entity_decode($page_item->find('.breads', 0)->find('.breads-item', 1)->find('a', 0)->find('span', 0)->plaintext);
+            }
+
+            if (str_get_html($page_item->find('.breads', 0)->find('.breads-item', 2)->find('a', 0))) {
+              $subcategory = html_entity_decode($page_item->find('.breads', 0)->find('.breads-item', 2)->find('a', 0)->find('span', 0)->plaintext);
+            }
+
+            if (str_get_html($page_item->find('.breads', 0)->find('.breads-item', 3))) {
+              if (str_get_html($page_item->find('.breads', 0)->find('.breads-item', 3)->find('a', 0))) {
+                $subcategory_2 = html_entity_decode($page_item->find('.breads', 0)->find('.breads-item', 3)->find('a', 0)->find('span', 0)->plaintext);
+              }
+            }
+
+            if (str_get_html($page_item->find('[itemprop="name"]', 0))) {
+              $name = html_entity_decode($page_item->find('[itemprop="name"]', 0)->plaintext);
+            }
+
+            if (str_get_html($page_item->find('.details-param-value', 0))) {
+              $atricle = html_entity_decode($page_item->find('.details-param-value', 0)->plaintext);
+            }
+
+            if (str_get_html($page_item->find('.details-availability', 0))) {
+              $available = html_entity_decode($page_item->find('.details-availability', 0)->plaintext);
+            }
+
+            if (str_get_html($page_item->find('.price-number', 0))) {
+              $price = html_entity_decode($page_item->find('.price-number', 0)->plaintext);
+            }
+
+            if (str_get_html($page_item->find('.details-tabs-deacription', 0))) {
+              $desc = trim(html_entity_decode($page_item->find('.details-tabs-deacription', 0)->plaintext));
+            }
+
+            /*echo 'Категория - ' . $category . '</br>';
+            echo 'Подкат - ' . $subcategory . '</br>';
+            echo 'Подкат_2 - ' . $subcategory_2 . '</br>';
+            echo 'Название - ' . $name . '</br>';
+            echo 'Артикул - ' . $atricle . '</br>';
+            echo 'Наличие - ' . $available . '</br>';
+            echo 'Цена - ' . $price . '</br>';
+            echo 'Описание - ' . $desc . '</br>';*/
+
+            $image_name = str_replace('&nbsp;', ' ', $name);
+            $image_name = preg_replace('/-/', '', $image_name);
+            $image_name = preg_replace('/^ /', '', $image_name);
+            $image_name = preg_replace('/«/', '', $image_name);
+            $image_name = str_replace('/', ' ', $image_name);
+            $image_name = preg_replace('/»/', '', $image_name);
+            $image_name = preg_replace('/\(/', '', $image_name);
+            $image_name = preg_replace('/\)/', '', $image_name);
+            $image_name = preg_replace('/:/', '', $image_name);
+            $image_name = preg_replace('/\./', '', $image_name);
+            $image_name = preg_replace('/,/', '', $image_name);
+            $image_name = preg_replace('/"/', '', $image_name);
+            $image_name = preg_replace('/”/', '', $image_name);
+            $image_name = preg_replace('/\s+/', ' ', $image_name);
+            $image_name = preg_replace('/№/', '', $image_name);
+            $image_name = str_replace(' ', '_', translit($image_name));
+            $image_name = preg_replace('/_$/', '', $image_name);
+
+            if (strlen($image_name) > 50) {
+              $pos_ = strpos($image_name, '_', '40');
+
+              if ($pos_) {
+                $image_name = substr($image_name, 0, $pos_);
+              }
+            }
+
+            $image_name_article = str_replace('/', ' ', $atricle);
+            $image_name_article = mb_strtolower(str_replace('&nbsp;', '', $image_name_article));
+            $image_name_article = str_replace(' ', '_', translit($image_name_article));
+
+            $image_name = $image_name . '_' . $image_name_article;
+            $image_name = str_replace('_', '-', mb_strtolower($image_name));
+
+            $links_image = $page_item->find('.gallery-photos-item-obj');
+            $urls = [];
+            $images_urls = [];
+
+            foreach ($links_image as $j => $link_image) {
+              $url_image = $link_image->src;
+              $url_image = str_replace('xsmall', 'big', $url_image);
+
+              array_push($urls, $url_image);
+            }
+
+            $urls = array_values(array_unique($urls));
+
+            foreach ($urls as $j => $url) {
+              $path = html_entity_decode(__DIR__ . '/items/' . $image_name . ($j !== 0 ? '_' . ($j + 1) : '') . '.jpg');
+              $image_file_name = $image_name . ($j !== 0 ? '_' . ($j + 1) : '') . '.jpg';
+              file_put_contents($path, file_get_contents($url));
+
+              array_push($images_urls, $image_file_name);
+            }
+
+            /*print_r($images_urls);
+            echo '</br></br>';*/
+
+            $sheet->setCellValue('A' . (2 + $i), $category);
+            $sheet->setCellValue('B' . (2 + $i), $subcategory);
+            $sheet->setCellValue('C' . (2 + $i), $subcategory_2);
+            $sheet->setCellValue('D' . (2 + $i), $name);
+            $sheet->setCellValue('E' . (2 + $i), $atricle);
+            $sheet->setCellValue('F' . (2 + $i), $available);
+            $sheet->setCellValue('G' . (2 + $i), $price);
+            $sheet->setCellValue('H' . (2 + $i), $desc);
+            $sheet->setCellValue('I' . (2 + $i), implode($images_urls, ';'));
+
           }
-
-          if (is_object($page_item->find('.breads', 0)->find('.breads-item', 1))) {
-            $category = html_entity_decode($page_item->find('.breads', 0)->find('.breads-item', 1)->find('a', 0)->find('span', 0)->plaintext);
-          }
-
-          if (is_object($page_item->find('.breads', 0)->find('.breads-item', 2))) {
-            $subcategory = html_entity_decode($page_item->find('.breads', 0)->find('.breads-item', 2)->find('a', 0)->find('span', 0)->plaintext);
-          }
-
-          if (is_object($page_item->find('.breads', 0)->find('.breads-item', 3))) {
-            $subcategory_2 = html_entity_decode($page_item->find('.breads', 0)->find('.breads-item', 3)->find('a', 0)->find('span', 0)->plaintext);
-          }
-
-          if (is_object($page_item->find('[itemprop="name"]', 0))) {
-            $name = html_entity_decode($page_item->find('[itemprop="name"]', 0)->plaintext);
-          }
-
-          if (is_object($page_item->find('.details-param-value', 0))) {
-            $atricle = html_entity_decode($page_item->find('.details-param-value', 0)->plaintext);
-          }
-
-          if (is_object($page_item->find('[data-ng-if="product.offerSelected.Available == null"]', 0))) {
-            $available = html_entity_decode($page_item->find('[data-ng-if="product.offerSelected.Available == null"]', 0)->plaintext);
-          }
-
-          if (is_object($page_item->find('.price-number', 0))) {
-            $price = html_entity_decode($page_item->find('.price-number', 0)->plaintext);
-          }
-
-          if (is_object($page_item->find('.tab-description-additional', 0))) {
-            $desc = html_entity_decode($page_item->find('.tab-description-additional', 0)->plaintext);
-          }
-
-          echo $category . '</br>';
-          echo $subcategory . '</br>';
-          echo $subcategory_2 . '</br>';
-          echo $name . '</br>';
-          echo $atricle . '</br>';
-          echo $available . '</br>';
-          echo $price . '</br>';
-          echo $desc . '</br>';
-
-
         }
       }
 
-      $objWriter->save(__DIR__ . '/excel/' . $file_name . '.xlsx');
+      $objWriter->save(__DIR__ . '/excel/' . $number . '. ' . $file_name . '.xlsx');
       $xls->disconnectWorksheets();
       unset($objWriter, $xls);
     }

@@ -19,3 +19,4 @@ yarn-error.log
 /resources/assets/default/package-lock.json
 /resources/assets/default/node_modules/
 /excel/
+/items/
